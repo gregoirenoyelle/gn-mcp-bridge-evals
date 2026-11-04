@@ -88,3 +88,9 @@ def result_data(result: CallToolResult) -> Any:
     if result.structured_content is not None:
         return result.structured_content
     return json.loads(result_text(result))
+
+
+def result_list(result: CallToolResult) -> list[Any]:
+    """Array payload of a tool whose output schema is an array (the server wraps it as {"result": [...]})."""
+    data = result_data(result)
+    return data["result"] if isinstance(data, dict) and "result" in data else data
