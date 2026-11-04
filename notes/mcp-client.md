@@ -47,18 +47,23 @@ async with http_client:
         result = await client.call_tool("gn-mcp-create-post", {"title": "...", "status": "draft"})
 ```
 
-To check before writing the client (Phase D):
+Confirmed against the local site (implemented in `src/gn_mcp_evals/client.py`):
 
-- The exact `auth=` form `httpx2` accepts (tuple or `httpx2.BasicAuth`)
+- Auth: `httpx2.BasicAuth(login, app_password)`
 - `list_tools()` pagination: loop on `next_cursor` until `None`
-- Local `.test` TLS: Valet's certificate is trusted by the macOS keychain, and `httpx2` uses the OS trust store (`truststore`), so it should work as-is
+- Local `.test` TLS works as-is: `httpx2` uses the OS trust store, which has Valet's certificate
+- `mode="auto"` lands on `2026-07-28`; `mode="legacy"` on `2025-11-25`. Both expose the same tools
 
 ### Reading results
 
 - `call_tool()` returns `is_error`, `content` (text for the model) and `structured_content` (for code)
 - A tool failure is **not** an exception: it comes back with `is_error=True`
 - `MCPError` is raised only when the server answers with a JSON-RPC error
-- How a refused `permission_callback` surfaces (`is_error` result or JSON-RPC error) is to be observed in Phase D. The security tests must accept either, then check the site state
+- A refused `permission_callback` comes back as a result with `is_error=True` and a **localized** message (e.g. "Droit refusé" on a French site). Never assert on the text. The security tests accept either shape (error result or `MCPError`), then check the site state
+
+## Site state checks
+
+`src/gn_mcp_evals/site.py` reads the site through WP-CLI (`WP_PATH`, `WP_CLI`), independently of the MCP server under test. Each test uses a unique post title; teardown deletes the posts it tracked plus any post left with that title (e.g. one created despite a refusal).
 
 ## Tool names
 
