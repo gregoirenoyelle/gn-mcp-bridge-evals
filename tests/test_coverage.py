@@ -18,6 +18,17 @@ TOOL_PREFIX = "gn-mcp-"
 
 COVERED_ABILITIES = {
     "gn-mcp/create-post",  # tests/test_create_post.py, tests/test_security_publish.py
+    "gn-mcp/search-posts",  # tests/test_read_abilities.py
+    "gn-mcp/get-post",  # tests/test_read_abilities.py
+    "gn-mcp/get-post-outline",  # tests/test_read_abilities.py
+    "gn-mcp/get-block",  # tests/test_read_abilities.py
+    "gn-mcp/get-post-meta",  # tests/test_read_abilities.py
+    "gn-mcp/list-categories",  # tests/test_read_abilities.py
+    "gn-mcp/update-post",  # tests/test_write_abilities.py
+    "gn-mcp/update-block",  # tests/test_write_abilities.py
+    "gn-mcp/update-post-meta",  # tests/test_write_abilities.py
+    "gn-mcp/update-term",  # tests/test_write_abilities.py
+    "gn-mcp/delete-post",  # tests/test_write_abilities.py
 }
 
 
@@ -33,9 +44,7 @@ async def test_registry_only_lists_exposed_abilities(full_identity: Identity) ->
     assert not stale, f"registry lists abilities the server no longer exposes: {sorted(stale)}"
 
 
-@pytest.mark.xfail(strict=True, reason="abilities not covered yet")
 async def test_every_exposed_ability_has_an_eval(full_identity: Identity) -> None:
-    """Remove the xfail marker once this passes (strict: an XPASS fails the run)."""
     exposed = await exposed_plugin_tools(full_identity)
     uncovered = exposed - {tool_name(ability) for ability in COVERED_ABILITIES}
     assert not uncovered, f"{len(uncovered)} abilities without an eval: {sorted(uncovered)}"
