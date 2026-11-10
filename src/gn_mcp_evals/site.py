@@ -69,17 +69,33 @@ def plugin_version(slug: str = "gn-mcp-bridge") -> str:
     return wp("plugin", "get", slug, "--field=version").strip()
 
 
-def create_post(title: str, content: str = "", status: str = "publish", post_type: str = "post") -> int:
-    """Create a post straight through WP-CLI (fixtures: independent from the MCP abilities under test)."""
-    out = wp(
+def user_id(login: str) -> int:
+    """ID of a user on the test site, by login."""
+    return int(wp("user", "get", login, "--field=ID").strip())
+
+
+def create_post(
+    title: str,
+    content: str = "",
+    status: str = "publish",
+    post_type: str = "post",
+    author: str | None = None,
+) -> int:
+    """Create a post straight through WP-CLI (fixtures: independent from the MCP abilities under test).
+
+    `author` is a user login; ownership matters for the per-post permission checks.
+    """
+    args = [
         "post", "create",
         f"--post_title={title}",
         f"--post_content={content}",
         f"--post_status={status}",
         f"--post_type={post_type}",
         "--porcelain",
-    )
-    return int(out.strip())
+    ]
+    if author:
+        args.append(f"--post_author={user_id(author)}")
+    return int(wp(*args).strip())
 
 
 def get_meta(post_id: int, key: str) -> Any | None:
