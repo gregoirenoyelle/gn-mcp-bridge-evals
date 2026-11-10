@@ -11,6 +11,40 @@ pip install -e ".[dev]"
 pytest
 ```
 
+## Running the suite
+
+The tests need a WordPress site with `gn-mcp-bridge` and `mcp-adapter` active, and two test identities (see below). Two ways to get one.
+
+### Against a local site
+
+Create the identities on the site, fill `.env` from `.env.example` (including `WP_PATH`, the site root used for the WP-CLI state checks), then:
+
+```bash
+source .venv/bin/activate
+pytest
+```
+
+### Against a throwaway `wp-env` site
+
+This is what CI does. It needs Node and Docker, and installs nothing on your machine's WordPress:
+
+```bash
+npm ci --ignore-scripts
+npx --no-install wp-env start
+scripts/ci-setup.sh                 # permalinks, identities, Application Passwords -> .env.wp-env
+set -a; source .env.wp-env; set +a
+WP_CLI="npx --no-install wp-env run cli wp" pytest
+npx --no-install wp-env stop
+```
+
+`.env.wp-env` is gitignored and its passwords only exist on the throwaway site.
+
+### In CI
+
+`.github/workflows/tests.yml` runs the same steps on every push to `main`, on pull requests and on demand: layer 1 only (no AI, no API key needed).
+
+Each report states the `gn-mcp-bridge` version tested. Last validated version: 1.8.2.
+
 ## Test identities
 
 The tests run against a **local** WordPress site with `gn-mcp-bridge` and `mcp-adapter` active. Never point them at a production site: they create and delete posts.
