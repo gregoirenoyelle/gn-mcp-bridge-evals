@@ -5,12 +5,13 @@ description = "Evals for the gn-mcp-bridge WordPress plugin, run through its MCP
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "mcp",
-    "python-dotenv",
+    "mcp>=2.3,<3",
+    "httpx2>=2.16,<3",
+    "python-dotenv>=1.2,<2",
 ]
 
 [project.optional-dependencies]
-dev = ["pytest"]
+dev = ["pytest>=9,<10"]
 
 [build-system]
 requires = ["setuptools>=68"]
