@@ -68,8 +68,19 @@ Source: `list_all_tools()` in `src/gn_mcp_evals/client.py` returns MCP `Tool` ob
 
 Calling: `client.call_tool(block.name, block.input)` on the MCP connection of the identity under test. A `CallToolResult` with `is_error` true maps to `is_error: True`; the content comes from `result_text(result)`.
 
-## To check in Phase D
+## Implementation (`src/gn_mcp_evals/agent/anthropic_adapter.py`)
 
-- That the tool names returned by the server all match the Claude name pattern
-- That the schemas the server returns are accepted as-is (no unsupported keywords)
-- Whether the 5.5 models reject forced tool use (`tool_choice: any` / `tool`), as the plan assumes: stay on `auto`, which makes this irrelevant
+- `AsyncAnthropic`, plain `messages.create` (no tool runner, no beta): the loop stays visible and owns the turn cap
+- Tool calls run **sequentially** in the order the model gave them (one shared site), and all results go back in one `user` message
+- Thinking: the `thinking` parameter is omitted (adaptive by default on the 5.5 models); depth is set with `--effort` only
+- System prompt kept neutral: it says nothing about refusals, so the security cases measure the model's default behavior
+- No server-side refusal fallback (`fallbacks`): a fallback would answer with another model and blur which model the report measures. A `refusal` is recorded as the run's stop reason
+- Missing `ANTHROPIC_API_KEY`: `MissingApiKey` at startup, turned into a one-line exit by `__main__.py`
+- Unit tests with a scripted fake client: `tests/test_anthropic_adapter.py` (skipped when the `agent` extra is not installed)
+
+## Checked in Phase D (2026-11-11, `anthropic` 2.8.0, `claude-haiku-5-5`)
+
+- The tool names and input schemas returned by the server are accepted as-is
+- `tool_choice: auto` only; forced tool use was never needed
+- Prompt caching works: after the first run, tools and system prompt come from the cache, and the cache is shared by both identities (same tool definitions)
+- Measured on the full suite (17 cases, 1 run each, default effort): ~1.2K uncached input, ~11K cache-read input and ~325 output tokens per run; ~$0.007 for the suite, ~3 min on Valet

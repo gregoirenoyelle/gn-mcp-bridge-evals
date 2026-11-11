@@ -54,10 +54,13 @@ def model_factory(args: argparse.Namespace) -> ModelFactory:
     if args.model == FAKE:
         return lambda case, ctx: FakeModel(case.fake_steps(ctx))
     try:
-        from gn_mcp_evals.agent.anthropic_adapter import AnthropicModel
+        from gn_mcp_evals.agent.anthropic_adapter import AnthropicModel, MissingApiKey
     except ImportError as error:
         raise SystemExit(f"Model '{args.model}' needs the Anthropic adapter: pip install -e '.[agent]' ({error})")
-    model: AgentModel = AnthropicModel(args.model, effort=args.effort, max_turns=args.max_turns)
+    try:
+        model: AgentModel = AnthropicModel(args.model, effort=args.effort, max_turns=args.max_turns)
+    except MissingApiKey as error:
+        raise SystemExit(str(error)) from None
 
     def same_model(case: Case, ctx: CaseContext) -> AgentModel:
         return model
