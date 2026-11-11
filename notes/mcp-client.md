@@ -1,6 +1,6 @@
 # MCP client — endpoint, auth, SDK calls
 
-Last updated: 2026-11-04
+Last updated: 2026-11-11
 
 How the Python client talks to the `gn-mcp-bridge` MCP server. Versions checked: `gn-mcp-bridge` 1.8.2, `mcp-adapter` 0.7.1, MCP Python SDK (`mcp`) 2.3.0.
 
@@ -94,6 +94,6 @@ Consequence for the test identities: a WordPress **Contributor** (`edit_posts`, 
 
 ## Theme-side abilities on the local site
 
-The active theme on the local site (`gncom-v8`) adds three abilities to the `gn-mcp` server through the `gn_mcp_bridge_exposed_abilities` filter: `gncom/search-portfolio`, `gncom/get-portfolio`, `gncom/create-translation`. `tools/list` therefore returns 15 tools, not 12.
+A theme or another plugin can add abilities to the `gn-mcp` server through the `gn_mcp_bridge_exposed_abilities` filter. On the author's local site, the active theme adds three, so `tools/list` returns 15 tools instead of 12.
 
 They belong to the site, not to the plugin. The coverage test only counts the plugin's tools (`gn-mcp-` prefix) and ignores the rest.
