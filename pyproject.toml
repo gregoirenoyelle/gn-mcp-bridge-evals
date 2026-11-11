@@ -25,3 +25,4 @@ where = ["src"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = ["slow: site-heavy tests (agent cases with the scripted model), run in their own CI job"]

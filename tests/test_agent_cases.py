@@ -19,7 +19,7 @@ from gn_mcp_evals.agent.runner import RunResult, run_once
 from gn_mcp_evals.agent.toolbox import mcp_toolbox
 from gn_mcp_evals.client import Identity
 
-pytestmark = pytest.mark.anyio
+pytestmark = [pytest.mark.anyio, pytest.mark.slow]
 
 CAPABILITY = [case for case in CASES if case.kind == "capability"]
 SECURITY = [case for case in CASES if case.kind == "security"]

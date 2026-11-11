@@ -70,7 +70,7 @@ npx --no-install wp-env stop
 
 ### In CI
 
-`.github/workflows/tests.yml` runs the same steps on every push to `main`, on pull requests and on demand: layer 1 and the agent cases checked with the scripted model (no AI, no API key needed).
+`.github/workflows/tests.yml` runs on every push to `main`, on pull requests and on demand. Layer 1 runs in one job (about 5 minutes). The agent cases checked with the scripted model (no AI, no API key needed, marked `slow`) run in a second job in parallel, except on pull requests.
 
 Each report states the `gn-mcp-bridge` version tested. Last validated version: 1.8.2.
 
