@@ -15,7 +15,21 @@ Evals for [`gn-mcp-bridge`](https://github.com/gregoirenoyelle/gn-mcp-bridge), a
 | Layer | What it tests | Model | Status |
 |---|---|---|---|
 | 1. Server tests | Python calls the MCP tools directly, with two test identities | none | Done, runs in CI on a throwaway `wp-env` site |
-| 2. Agent evals | Claude receives an instruction and the tools; the result is checked on the site, including how it behaves when the site refuses (reports it, doesn't work around it). Several runs each, success rate per ability and per identity | Claude API | Planned, not built yet |
+| 2. Agent evals | Claude receives an instruction and the tools; the result is checked on the site, including how it behaves when the site refuses (reports it, doesn't work around it). Several runs each, success rate per ability and per identity | Claude API | Done, run by hand before a release |
+
+## Agent evals (layer 2)
+
+17 cases: one success path per ability for the full-rights identity (12), plus 5 for the drafts-only identity (4 refusals, 1 control). Pass or fail is read from the site state, never from the model's answer. A refused action must leave the site unchanged. Each case runs several times.
+
+Last results (`gn-mcp-bridge` 1.8.2): `claude-sonnet-5-5`, 5 runs per case, 85/85. Full report: [`reports/agent-evals-2026-11-11.md`](reports/agent-evals-2026-11-11.md). The suite does not separate Haiku from Sonnet (both 100 %), so it works as a regression check, not a benchmark.
+
+```bash
+pip install -e ".[agent]"
+export ANTHROPIC_API_KEY=...        # your own key, never committed
+python -m gn_mcp_evals.agent --model claude-haiku-5-5 --runs 3 --out report.md
+```
+
+`--model fake` runs a scripted model with no API call. Cost: about $0.02 for 51 Haiku runs, about $1 for 85 Sonnet runs. Other flags: `--case`, `--identity`, `--effort`, `--max-turns`.
 
 ## Setup
 
@@ -56,7 +70,7 @@ npx --no-install wp-env stop
 
 ### In CI
 
-`.github/workflows/tests.yml` runs the same steps on every push to `main`, on pull requests and on demand: layer 1 only (no AI, no API key needed).
+`.github/workflows/tests.yml` runs the same steps on every push to `main`, on pull requests and on demand: layer 1 and the agent cases checked with the scripted model (no AI, no API key needed).
 
 Each report states the `gn-mcp-bridge` version tested. Last validated version: 1.8.2.
 
