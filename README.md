@@ -1,6 +1,21 @@
 # gn-mcp-bridge-evals
 
-Evals for the `gn-mcp-bridge` WordPress plugin, run from the outside through its MCP server.
+[![Tests](https://github.com/gregoirenoyelle/gn-mcp-bridge-evals/actions/workflows/tests.yml/badge.svg)](https://github.com/gregoirenoyelle/gn-mcp-bridge-evals/actions/workflows/tests.yml)
+
+Evals for [`gn-mcp-bridge`](https://github.com/gregoirenoyelle/gn-mcp-bridge), a WordPress plugin that exposes content abilities as an MCP server. The evals run from the outside, through that MCP server, like any MCP client would.
+
+## What the evals prove
+
+- Each of the plugin's 12 abilities does what it says, checked on the **site state** (WP-CLI reads the database), never on the server's answer
+- Permissions hold: an identity limited to drafts is refused when it tries to publish, read another author's content or change terms, and nothing changes on the site
+- No ability ships without a test: a coverage test reads `tools/list` and fails if the server exposes an ability with no eval
+
+## Two layers
+
+| Layer | What it tests | Model | Status |
+|---|---|---|---|
+| 1. Server tests | Python calls the MCP tools directly, with two test identities | none | Done, runs in CI on a throwaway `wp-env` site |
+| 2. Agent evals | Claude receives an instruction and the tools; the result is checked on the site, including how it behaves when the site refuses (reports it, doesn't work around it). Several runs each, success rate per ability and per identity | Claude API | Planned, not built yet |
 
 ## Setup
 
