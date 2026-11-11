@@ -56,6 +56,25 @@ def find_posts(title: str, status: str = "any") -> list[dict[str, Any]]:
     return json.loads(out)
 
 
+def find_containing(text: str) -> list[dict[str, Any]]:
+    """Posts of every status, trash included, with `text` in their title, content or excerpt."""
+    out = wp(
+        "post", "list",
+        "--post_type=post,page,wp_block",
+        "--post_status=any,trash",
+        f"--s={text}",
+        "--fields=ID,post_title,post_status,post_type",
+        "--format=json",
+    )
+    return json.loads(out)
+
+
+def find_terms_containing(text: str, taxonomy: str) -> list[dict[str, Any]]:
+    """Terms of a taxonomy whose name contains `text`."""
+    out = wp("term", "list", taxonomy, f"--search={text}", "--fields=term_id,name,slug", "--format=json")
+    return json.loads(out)
+
+
 def delete_post(post_id: int) -> None:
     """Delete a post for good (bypassing the trash). Silent if it is already gone."""
     try:
@@ -80,6 +99,7 @@ def create_post(
     status: str = "publish",
     post_type: str = "post",
     author: str | None = None,
+    excerpt: str = "",
 ) -> int:
     """Create a post straight through WP-CLI (fixtures: independent from the MCP abilities under test).
 
@@ -93,6 +113,8 @@ def create_post(
         f"--post_type={post_type}",
         "--porcelain",
     ]
+    if excerpt:
+        args.append(f"--post_excerpt={excerpt}")
     if author:
         args.append(f"--post_author={user_id(author)}")
     return int(wp(*args).strip())

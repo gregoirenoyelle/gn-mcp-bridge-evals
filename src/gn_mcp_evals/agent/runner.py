@@ -51,7 +51,7 @@ async def run_once(
         model = model_for(case, ctx)
         async with toolbox_for(case.identity) as toolbox:
             result.transcript = await model.run(case.render_instruction(ctx), toolbox)
-        check = case.check(ctx)
+        check = case.evaluate(ctx)
         result.status = "pass" if check.passed else "fail"
         result.detail = check.detail
     except Exception as error:  # a broken run is reported, not raised: the other runs go on

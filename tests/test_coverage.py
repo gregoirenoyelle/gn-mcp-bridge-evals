@@ -9,6 +9,7 @@ folder exercises it and checks the result on the site state.
 
 import pytest
 
+from gn_mcp_evals.agent.cases import CASES
 from gn_mcp_evals.client import Identity, connect, list_all_tools, tool_name
 
 pytestmark = pytest.mark.anyio
@@ -48,3 +49,11 @@ async def test_every_exposed_ability_has_an_eval(full_identity: Identity) -> Non
     exposed = await exposed_plugin_tools(full_identity)
     uncovered = exposed - {tool_name(ability) for ability in COVERED_ABILITIES}
     assert not uncovered, f"{len(uncovered)} abilities without an eval: {sorted(uncovered)}"
+
+
+async def test_every_exposed_ability_has_an_agent_case(full_identity: Identity) -> None:
+    """Layer 2: same rule, read from the agent cases themselves (no hand-kept list)."""
+    exposed = await exposed_plugin_tools(full_identity)
+    in_cases = {tool_name(case.ability) for case in CASES}
+    assert not exposed - in_cases, f"abilities without an agent case: {sorted(exposed - in_cases)}"
+    assert not in_cases - exposed, f"agent cases for abilities the server no longer exposes: {sorted(in_cases - exposed)}"
