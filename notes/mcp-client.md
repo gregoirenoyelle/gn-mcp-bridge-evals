@@ -6,7 +6,7 @@ How the Python client talks to the `gn-mcp-bridge` MCP server. Versions checked:
 
 ## Endpoint
 
-- URL: `<site>/wp-json/gn-mcp/mcp` (local: `https://gregoirenoyelle.test/wp-json/gn-mcp/mcp`)
+- URL: `<site>/wp-json/gn-mcp/mcp` (local: `https://example.test/wp-json/gn-mcp/mcp`)
 - Server declared by the plugin on `mcp_adapter_init`, HTTP transport only
 - mcp-adapter's default server (`/wp-json/mcp/mcp-adapter-default-server`) is disabled by the plugin: `gn-mcp` is the only surface
 

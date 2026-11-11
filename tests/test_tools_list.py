@@ -6,7 +6,7 @@ from gn_mcp_evals.client import Identity, connect, list_all_tools, tool_name
 
 pytestmark = pytest.mark.anyio
 
-# Abilities documented in the plugin's CLAUDE.md / Config::DEFAULT_CAPABILITIES.
+# Abilities listed in the plugin's public README / Config::DEFAULT_CAPABILITIES.
 PLUGIN_ABILITIES = [
     "gn-mcp/search-posts",
     "gn-mcp/get-post",
