@@ -3,6 +3,8 @@ name = "gn-mcp-bridge-evals"
 version = "0.1.0"
 description = "Evals for the gn-mcp-bridge WordPress plugin, run through its MCP server"
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 requires-python = ">=3.12"
 dependencies = [
     "mcp>=2.3,<3",
