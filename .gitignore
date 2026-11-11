@@ -1,8 +1,3 @@
-# Private working files (never published)
-TODO.md
-CLAUDE.md
-.local-working/
-
 # Secrets
 .env
 .env.*
