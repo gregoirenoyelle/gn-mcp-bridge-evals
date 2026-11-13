@@ -44,6 +44,8 @@ pytest
 
 The tests need a WordPress site with `gn-mcp-bridge` and `mcp-adapter` active, and two test identities (see below). Two ways to get one.
 
+Other sites, local vs CI, why layer 2 uses the API, where results go: [`notes/usage.md`](notes/usage.md).
+
 ### Against a local site
 
 Create the identities on the site, fill `.env` from `.env.example` (including `WP_PATH`, the site root used for the WP-CLI state checks), then:
