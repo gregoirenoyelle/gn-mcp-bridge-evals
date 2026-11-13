@@ -1,4 +1,4 @@
-"""Command line: python -m gn_mcp_evals.agent --model <id|fake> [--runs N] [--case ID] [--identity NAME] [--out FILE]
+"""Command line: python -m gn_mcp_evals.agent --model <id|fake> [--runs N] [--case ID] [--identity NAME] [--out FILE] [--json FILE]
 
 `--model fake` replays each case's scripted steps: no API call, used to check the
 cases themselves against the site. Any other value is a Claude model id.
@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import asyncio
 import datetime
+import json
 import sys
 from pathlib import Path
 
@@ -18,7 +19,7 @@ from gn_mcp_evals import site
 from gn_mcp_evals.agent.cases import CASES, Case, CaseContext
 from gn_mcp_evals.agent.fake import FakeModel
 from gn_mcp_evals.agent.model import AgentModel
-from gn_mcp_evals.agent.report import Meta, render
+from gn_mcp_evals.agent.report import Meta, render, to_json
 from gn_mcp_evals.agent.runner import ModelFactory, RunResult, run_cases
 from gn_mcp_evals.agent.toolbox import mcp_toolbox
 
@@ -34,6 +35,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--effort", choices=["low", "medium", "high", "xhigh", "max"], help="model effort level")
     parser.add_argument("--max-turns", type=int, default=20, help="turn cap per run (default 20)")
     parser.add_argument("--out", type=Path, help="write the report here (default: print it)")
+    parser.add_argument("--json", type=Path, help="also write every run, with its full transcript, to this JSON file")
     args = parser.parse_args(argv)
     if args.runs < 1:
         parser.error("--runs must be at least 1")
@@ -102,6 +104,10 @@ def main(argv: list[str] | None = None) -> int:
         print(f"Report written to {args.out}", file=sys.stderr)
     else:
         print(report)
+    if args.json:
+        args.json.parent.mkdir(parents=True, exist_ok=True)
+        args.json.write_text(json.dumps(to_json(results, meta), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(f"Runs written to {args.json}", file=sys.stderr)
 
     all_clean = all(result.status == "pass" and not result.cleanup_error for result in results)
     return 0 if all_clean else 1
