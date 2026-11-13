@@ -14,7 +14,7 @@ from gn_mcp_evals.agent.__main__ import parse_args, select_cases
 from gn_mcp_evals.agent.cases import Case, CaseContext, Check
 from gn_mcp_evals.agent.fake import FakeModel, Step
 from gn_mcp_evals.agent.model import ToolDefinition, ToolOutcome, Transcript, Usage
-from gn_mcp_evals.agent.report import Meta, render
+from gn_mcp_evals.agent.report import Meta, render, to_json
 from gn_mcp_evals.agent.runner import run_cases
 from gn_mcp_evals.agent.toolbox import McpToolbox
 
@@ -239,6 +239,24 @@ async def test_report_gives_rates_per_ability_and_identity_with_version_and_toke
     assert "| Input, cache reads | 4,000 | 1,000 |" in report
     assert "### `create-post-full`, run 2: fail" in report
     assert "draft missing" in report
+
+
+async def test_json_keeps_every_run_with_its_tool_calls() -> None:
+    outcomes = iter([True, False])
+    case = make_case(
+        check=lambda ctx: Check(next(outcomes), "draft missing"),
+        fake_steps=lambda ctx: [Step("gn-mcp-create-post", {"title": ctx.marker})],
+    )
+    results = await run_cases([case], 2, fake_model_for, toolbox_factory(FakeToolbox()))
+
+    data = to_json(results, Meta("1.8.3", "fake", "default", 2, "2026-11-13"))
+
+    assert data["meta"]["plugin_version"] == "1.8.3"
+    assert data["summary"]["passed"] == 1 and data["summary"]["total"] == 2
+    assert [run["status"] for run in data["runs"]] == ["pass", "fail"]
+    assert data["runs"][1]["detail"] == "draft missing"
+    call = data["runs"][0]["tool_calls"][0]
+    assert call["name"] == "gn-mcp-create-post" and call["outcome"] == '{"id": 1}' and not call["is_error"]
 
 
 # --- command line -------------------------------------------------------------

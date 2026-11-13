@@ -1,11 +1,12 @@
-"""Markdown results report: success rate per ability and per identity, with what was tested."""
+"""Results reports: Markdown (success rate per ability and per identity) and JSON (every run, full transcript)."""
 
 from __future__ import annotations
 
 from collections import defaultdict
 from collections.abc import Callable, Hashable
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from functools import reduce
+from typing import Any
 
 from gn_mcp_evals.agent.model import Usage
 from gn_mcp_evals.agent.runner import RunResult
@@ -110,3 +111,41 @@ def render(results: list[RunResult], meta: Meta) -> str:
         lines.append("")
 
     return "\n".join(lines).rstrip() + "\n"
+
+
+def to_json(results: list[RunResult], meta: Meta) -> dict[str, Any]:
+    """Every run with its full transcript (tool calls, arguments, outcomes, final answer), passes included."""
+    return {
+        "meta": asdict(meta),
+        "summary": {
+            "passed": sum(result.status == "pass" for result in results),
+            "total": len(results),
+            "usage": asdict(reduce(lambda total, result: total + result.usage, results, Usage())),
+        },
+        "runs": [
+            {
+                "case": result.case.id,
+                "ability": result.case.ability,
+                "identity": result.case.identity,
+                "kind": result.case.kind,
+                "run": result.run_index,
+                "status": result.status,
+                "detail": result.detail,
+                "cleanup_error": result.cleanup_error,
+                "stop_reason": result.transcript.stop_reason,
+                "turns": result.transcript.turns,
+                "usage": asdict(result.transcript.usage),
+                "tool_calls": [
+                    {
+                        "name": call.name,
+                        "arguments": call.arguments,
+                        "is_error": call.outcome.is_error,
+                        "outcome": call.outcome.text,
+                    }
+                    for call in result.transcript.tool_calls
+                ],
+                "final_text": result.transcript.final_text,
+            }
+            for result in results
+        ],
+    }
