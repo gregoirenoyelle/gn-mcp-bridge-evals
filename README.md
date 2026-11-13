@@ -29,7 +29,7 @@ export ANTHROPIC_API_KEY=...        # your own key, never committed
 python -m gn_mcp_evals.agent --model claude-haiku-5-5 --runs 3 --out report.md
 ```
 
-`--model fake` runs a scripted model with no API call. Cost: about $0.02 for 51 Haiku runs, about $1 for 85 Sonnet runs. Other flags: `--case`, `--identity`, `--effort`, `--max-turns`.
+`--model fake` runs a scripted model with no API call. Cost: about $0.02 for 51 Haiku runs, about $1 for 85 Sonnet runs. Other flags: `--case`, `--identity`, `--effort`, `--max-turns`, and `--json runs.json` to keep every run with its full transcript (tool calls, arguments, site answers, final answer), passes included.
 
 ## Setup
 
